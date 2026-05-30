@@ -17,6 +17,7 @@ struct MockInterviewView: View {
                 Text("AI Mock Interview")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "InterviewPanel", title: "Panel practice with presence", subtitle: "Rehearse realistic behaviour, strengths, Fast Stream, and blended interviews.")
                 Picker("Interview type", selection: $type) {
                     ForEach(types, id: \.self) { Text($0).tag($0) }
                 }

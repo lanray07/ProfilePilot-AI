@@ -14,7 +14,7 @@ struct OnboardingView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 10) {
+                BrandedHeroPanel(imageName: "CoachHero", height: 310) {
                     Text("ProfilePilot AI")
                         .font(.largeTitle.bold())
                         .foregroundStyle(PremiumTheme.ink)

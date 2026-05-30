@@ -83,6 +83,79 @@ struct PremiumButton: View {
     }
 }
 
+struct PremiumHeroImage: View {
+    let name: String
+    let height: CGFloat
+
+    var body: some View {
+        Image(name)
+            .resizable()
+            .scaledToFill()
+            .frame(maxWidth: .infinity)
+            .frame(height: height)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay {
+                LinearGradient(
+                    colors: [.black.opacity(0.58), .clear, .black.opacity(0.2)],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.white.opacity(0.12)))
+    }
+}
+
+struct BrandedHeroPanel<Content: View>: View {
+    let imageName: String
+    let height: CGFloat
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            PremiumHeroImage(name: imageName, height: height)
+            VStack(alignment: .leading, spacing: 8) {
+                Image("LogoMark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 42, height: 42)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                content
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
+struct FeatureImageCard: View {
+    let imageName: String
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .frame(height: 170)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            LinearGradient(colors: [.clear, .black.opacity(0.72)], startPoint: .top, endPoint: .bottom)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.white)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.82))
+            }
+            .padding(14)
+        }
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(.white.opacity(0.12)))
+    }
+}
+
 struct UpgradeBanner: View {
     let action: () -> Void
 
@@ -234,29 +307,35 @@ struct ShareCardPreview: View {
     let metric: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
-            HStack {
-                Text("ProfilePilot AI")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(PremiumTheme.gold)
+        ZStack {
+            Image("ShareCardBackground")
+                .resizable()
+                .scaledToFill()
+            LinearGradient(colors: [.black.opacity(0.14), .black.opacity(0.68)], startPoint: .top, endPoint: .bottom)
+            VStack(alignment: .leading, spacing: 22) {
+                HStack {
+                    Text("ProfilePilot AI")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(PremiumTheme.gold)
+                    Spacer()
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(PremiumTheme.gold)
+                }
                 Spacer()
-                Image(systemName: "sparkles")
-                    .foregroundStyle(PremiumTheme.gold)
+                Text(title)
+                    .font(.title2.bold())
+                    .foregroundStyle(PremiumTheme.ink)
+                Text(metric)
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.white)
+                Text(ComplianceNotice.text)
+                    .font(.caption2)
+                    .foregroundStyle(PremiumTheme.muted)
             }
-            Spacer()
-            Text(title)
-                .font(.title2.bold())
-                .foregroundStyle(PremiumTheme.ink)
-            Text(metric)
-                .font(.largeTitle.bold())
-                .foregroundStyle(.white)
-            Text(ComplianceNotice.text)
-                .font(.caption2)
-                .foregroundStyle(PremiumTheme.muted)
+            .padding(22)
         }
-        .padding(22)
         .frame(height: 220)
-        .background(RoundedRectangle(cornerRadius: 8).fill(PremiumTheme.navy2))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(PremiumTheme.gold.opacity(0.35)))
     }
 }
@@ -298,9 +377,11 @@ struct PremiumEmptyState: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.largeTitle)
-                .foregroundStyle(PremiumTheme.gold)
+            Image("EmptyState")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 92)
+                .accessibilityHidden(true)
             Text(title)
                 .font(.headline)
                 .foregroundStyle(PremiumTheme.ink)

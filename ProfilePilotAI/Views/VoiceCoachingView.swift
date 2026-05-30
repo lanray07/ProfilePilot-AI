@@ -16,6 +16,7 @@ struct VoiceCoachingView: View {
                 Text("Voice Coaching")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "VoiceCoaching", title: "Speak naturally. Refine deliberately.", subtitle: "Capture achievements, practice answers, and convert voice notes into coaching drafts.")
                 Picker("Module", selection: $module) {
                     ForEach(modules, id: \.self) { Text($0).tag($0) }
                 }

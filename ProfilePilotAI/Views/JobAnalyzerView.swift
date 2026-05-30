@@ -11,6 +11,7 @@ struct JobAnalyzerView: View {
                 Text("Job Description Analyzer")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "StarWorkspace", title: "Extract the scoring story", subtitle: "Turn advert language into behaviours, risks, and interview strategy.")
                 TextEditor(text: $jobAdvert)
                     .frame(minHeight: 180)
                     .padding(10)

@@ -27,6 +27,7 @@
 		A00100000000000000000012 /* SubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000012 /* SubscriptionService.swift */; };
 		A00100000000000000000013 /* WidgetPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000013 /* WidgetPlaceholder.swift */; };
 		A00100000000000000000014 /* WatchCompanionPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000014 /* WatchCompanionPlaceholder.swift */; };
+		A00100000000000000000015 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000016 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 		A00200000000000000000013 /* WidgetPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPlaceholder.swift; sourceTree = "<group>"; };
 		A00200000000000000000014 /* WatchCompanionPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchCompanionPlaceholder.swift; sourceTree = "<group>"; };
 		A00200000000000000000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A00200000000000000000016 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,7 +62,7 @@
 
 /* Begin PBXGroup section */
 		A00400000000000000000000 = {isa = PBXGroup; children = (A00400000000000000000001 /* ProfilePilotAI */, A00400000000000000000002 /* Products */); sourceTree = "<group>"; };
-		A00400000000000000000001 /* ProfilePilotAI */ = {isa = PBXGroup; children = (A00200000000000000000001 /* ProfilePilotAIApp.swift */, A00200000000000000000015 /* Info.plist */, A00400000000000000000003 /* Models */, A00400000000000000000004 /* ViewModels */, A00400000000000000000005 /* Views */, A00400000000000000000006 /* Components */, A00400000000000000000007 /* Services */, A00400000000000000000008 /* Voice */, A00400000000000000000009 /* WidgetsPlaceholder */, A0040000000000000000000A /* WatchPlaceholder */); path = ProfilePilotAI; sourceTree = "<group>"; };
+		A00400000000000000000001 /* ProfilePilotAI */ = {isa = PBXGroup; children = (A00200000000000000000001 /* ProfilePilotAIApp.swift */, A00200000000000000000015 /* Info.plist */, A00200000000000000000016 /* Assets.xcassets */, A00400000000000000000003 /* Models */, A00400000000000000000004 /* ViewModels */, A00400000000000000000005 /* Views */, A00400000000000000000006 /* Components */, A00400000000000000000007 /* Services */, A00400000000000000000008 /* Voice */, A00400000000000000000009 /* WidgetsPlaceholder */, A0040000000000000000000A /* WatchPlaceholder */); path = ProfilePilotAI; sourceTree = "<group>"; };
 		A00400000000000000000002 /* Products */ = {isa = PBXGroup; children = (A00200000000000000000000 /* ProfilePilot AI.app */); name = Products; sourceTree = "<group>"; };
 		A00400000000000000000003 /* Models */ = {isa = PBXGroup; children = (A00200000000000000000002 /* AppModels.swift */); path = Models; sourceTree = "<group>"; };
 		A00400000000000000000004 /* ViewModels */ = {isa = PBXGroup; children = (A00200000000000000000003 /* AppViewModel.swift */); path = ViewModels; sourceTree = "<group>"; };
@@ -81,7 +83,7 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A00700000000000000000000 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A00700000000000000000000 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00100000000000000000015 /* Assets.xcassets in Resources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */

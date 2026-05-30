@@ -16,6 +16,7 @@ struct STARBuilderView: View {
                 Text("AI STAR Builder")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "StarWorkspace", title: "Evidence that feels senior", subtitle: "Shape achievements into polished public-sector examples.")
                 Picker("Competency", selection: $competency) {
                     ForEach(Competency.allCases) { Text($0.rawValue).tag($0) }
                 }

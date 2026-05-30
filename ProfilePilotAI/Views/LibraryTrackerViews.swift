@@ -10,6 +10,7 @@ struct CoachingHomeView: View {
                 Text("Coaching Suite")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "InterviewPanel", title: "Human coaching, structured by AI", subtitle: "Prepare with calm, premium, realistic practice modes.")
                 InterviewCard(mode: "Success Profiles Coach", description: "Behaviours, strengths, experience, and technical skills.") { viewModel.path.append(.successProfiles) }
                 InterviewCard(mode: "AI STAR Builder", description: "Polish evidence into interview and application versions.") { viewModel.path.append(.starBuilder) }
                 InterviewCard(mode: "Voice Coaching", description: "Speak achievements and generate structured answers.") { viewModel.path.append(.voiceCoaching) }
@@ -30,6 +31,7 @@ struct LibraryHomeView: View {
                 Text("Evidence Library")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "StarWorkspace", title: "Your evidence bank", subtitle: "Keep achievements ready for applications, interviews, and promotions.")
                 InterviewCard(mode: "Behaviour Library", description: "Search, tag, and filter STAR stories.") { viewModel.path.append(.behaviourLibrary) }
                 InterviewCard(mode: "Application Builder", description: "Create supporting statements and evidence drafts.") { viewModel.path.append(.applicationBuilder) }
                 InterviewCard(mode: "Premium Share Cards", description: "Generate polished readiness milestones.") { viewModel.path.append(.shareCards) }
@@ -50,6 +52,7 @@ struct ProgressHomeView: View {
                 Text("Progress")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "RoadmapIllustration", title: "A visible path forward", subtitle: "Track readiness, coverage, and career progression.")
                 InterviewCard(mode: "Application Tracker", description: "Deadlines, interviews, offers, and decisions.") { viewModel.path.append(.applicationTracker) }
                 InterviewCard(mode: "Confidence Dashboard", description: "Coverage, strengths, weaknesses, and readiness.") { viewModel.path.append(.confidenceDashboard) }
                 InterviewCard(mode: "AI Career Roadmap", description: "Promotion pathway, gaps, and next-role options.") { viewModel.path.append(.careerRoadmap) }
@@ -74,6 +77,7 @@ struct SuccessProfilesCoachView: View {
                 Text("Success Profiles Coach")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "CoachHero", title: "Coach the whole profile", subtitle: "Behaviours, strengths, experience, and technical evidence in one place.")
                 ForEach(sections, id: \.0) { section in
                     ResultListCard(title: section.0, icon: "building.columns", items: section.1)
                 }
@@ -134,6 +138,7 @@ struct ApplicationBuilderView: View {
                 Text("Application Builder")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "StarWorkspace", title: "Draft with judgement", subtitle: "Build statements that stay specific, measured, and reviewable.")
                 TextEditor(text: $prompt)
                     .frame(minHeight: 140)
                     .padding(8)
@@ -220,6 +225,7 @@ struct ConfidenceDashboardView: View {
                 Text("Confidence Dashboard")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "ShareCardBackground", title: "Readiness you can see", subtitle: "Elegant analytics for confidence, coverage, and progress.")
                 HStack {
                     ConfidenceScoreRing(score: 0.82, label: "Ready")
                     ConfidenceScoreRing(score: 0.74, label: "Coverage")
@@ -250,6 +256,7 @@ struct CareerRoadmapView: View {
                 Text("AI Career Roadmap")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
+                FeatureImageCard(imageName: "RoadmapIllustration", title: "Promotion pathway", subtitle: "Map skill gaps, next roles, and development actions.")
                 PremiumButton(title: "Generate Roadmap", icon: "map") {
                     Task { await viewModel.loadRoadmap(profile: profile) }
                 }

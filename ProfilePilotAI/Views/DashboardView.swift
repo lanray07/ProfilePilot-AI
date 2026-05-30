@@ -41,7 +41,7 @@ struct DashboardView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        BrandedHeroPanel(imageName: "CoachHero", height: 240) {
             Text("Good evening")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(PremiumTheme.gold)
@@ -51,7 +51,6 @@ struct DashboardView: View {
             Text("\(profile.targetOrganization) • \(profile.targetGrade) • \(profile.coachingStyle) coaching")
                 .foregroundStyle(PremiumTheme.muted)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var metricsGrid: some View {
