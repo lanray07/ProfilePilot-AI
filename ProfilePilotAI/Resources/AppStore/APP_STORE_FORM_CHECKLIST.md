@@ -3,7 +3,7 @@
 ## iOS App Version 1.0
 
 - iPhone screenshots: upload `ProfilePilotAI/Resources/AppStore/iPhone-6.5-JPEG/*.jpg`
-- iPad screenshots: upload `ProfilePilotAI/Resources/AppStore/iPad/*.png`
+- iPad screenshots: upload `ProfilePilotAI/Resources/AppStore/iPad-JPEG/*.jpg`
 - Promotional Text: use the text in `APP_STORE_CONNECT_METADATA.md`
 - Description: use the text in `APP_STORE_CONNECT_METADATA.md`
 - Keywords: `civil service,NHS,public sector,STAR,interview,career,applications,competency,success profiles`

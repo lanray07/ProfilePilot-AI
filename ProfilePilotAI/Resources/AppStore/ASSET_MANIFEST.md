@@ -18,9 +18,26 @@
 
 ## iPad
 
+- `iPad-JPEG/ipad-01-dashboard-2048x2732.jpg`
+- `iPad-JPEG/ipad-02-roadmap-2048x2732.jpg`
+- `iPad-JPEG/ipad-03-star-2048x2732.jpg`
+- `iPad-JPEG/ipad-04-interview-2048x2732.jpg`
+- `iPad-JPEG/ipad-05-voice-coach-2048x2732.jpg`
+- `iPad-JPEG/ipad-06-job-analyzer-2048x2732.jpg`
+- `iPad-JPEG/ipad-07-library-2048x2732.jpg`
+- `iPad-JPEG/ipad-08-subscription-2048x2732.jpg`
+- `iPad-JPEG/ipad-09-share-export-2048x2732.jpg`
+- `iPad-JPEG/ipad-10-trust-2048x2732.jpg`
 - `iPad/ipad-01-dashboard-2048x2732.png`
 - `iPad/ipad-02-roadmap-2048x2732.png`
 - `iPad/ipad-03-star-2048x2732.png`
+- `iPad/ipad-04-interview-2048x2732.png`
+- `iPad/ipad-05-voice-coach-2048x2732.png`
+- `iPad/ipad-06-job-analyzer-2048x2732.png`
+- `iPad/ipad-07-library-2048x2732.png`
+- `iPad/ipad-08-subscription-2048x2732.png`
+- `iPad/ipad-09-share-export-2048x2732.png`
+- `iPad/ipad-10-trust-2048x2732.png`
 
 ## Subscriptions
 
