@@ -353,6 +353,12 @@ struct PaywallView: View {
                     .foregroundStyle(PremiumTheme.muted)
                 ForEach([SubscriptionPlan.professionalMonthly, .professionalYearly, .acceleratorMonthly]) { plan in
                     PremiumDashboardCard(title: plan.rawValue, subtitle: plan.price, icon: plan == .acceleratorMonthly ? "crown" : "briefcase") {
+                        Image(plan == .acceleratorMonthly ? "SubscriptionAccelerator" : "SubscriptionProfessional")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 150)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.white.opacity(0.12)))
                         PremiumButton(title: "Choose Plan", icon: "checkmark") {
                             subscription.purchasePlaceholder(plan)
                         }
