@@ -57,5 +57,10 @@ struct VoiceCoachingView: View {
         }
         .background(PremiumBackground())
         .navigationTitle("Voice")
+        .onAppear {
+            if speech.transcript.isEmpty {
+                speech.transcript = "I led a short-notice piece of work where three teams disagreed on the best way to brief senior leaders. I gathered evidence, clarified the decision needed, brought the right people into one conversation, and turned the outcome into a clear recommendation. The work was approved on time and improved how we handled similar urgent requests."
+            }
+        }
     }
 }

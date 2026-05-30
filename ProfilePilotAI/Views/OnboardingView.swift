@@ -4,9 +4,9 @@ import SwiftUI
 struct OnboardingView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var organization = TargetOrganization.civilService
-    @State private var targetRole = "Policy Officer"
-    @State private var grade = "HEO"
-    @State private var confidence = 0.55
+    @State private var targetRole = "Senior Policy Officer"
+    @State private var grade = "SEO"
+    @State private var confidence = 0.68
     @State private var style = CoachingStyle.executive
 
     private let grades = ["EO", "HEO", "SEO", "Grade 7", "Grade 6", "NHS Band 2-8"]
@@ -80,6 +80,7 @@ struct OnboardingView: View {
                     modelContext.insert(profile)
                     modelContext.insert(SubscriptionState())
                     seedAchievements()
+                    seedDemoWorkspace()
                 }
 
                 Text(ComplianceNotice.text)
@@ -95,6 +96,20 @@ struct OnboardingView: View {
         ["Interview Ready", "Application Submitted", "STAR Mastery", "Success Profile Progress"].forEach {
             modelContext.insert(Achievement(title: $0, detail: "Premium share card placeholder", unlocked: false))
         }
+    }
+
+    private func seedDemoWorkspace() {
+        modelContext.insert(JobApplication(title: "Senior Policy Officer", organization: "Civil Service", status: ApplicationStatus.drafting.rawValue))
+        modelContext.insert(JobApplication(title: "Service Improvement Lead", organization: "NHS", status: ApplicationStatus.researching.rawValue))
+        modelContext.insert(
+            STARExample(
+                competency: Competency.communicatingInfluencing.rawValue,
+                title: "Stakeholder briefing under pressure",
+                content: "Situation: A cross-team policy update needed ministerial clearance within 48 hours. Task: I had to align operational, legal, and communications colleagues around a clear recommendation. Action: I clarified the decision points, translated technical risks into plain English, and ran a focused briefing session. Result: The submission was cleared on time and the delivery team reused the briefing format for future urgent decisions.",
+                score: 82,
+                tags: ["Policy", "Stakeholders", "SEO"]
+            )
+        )
     }
 }
 

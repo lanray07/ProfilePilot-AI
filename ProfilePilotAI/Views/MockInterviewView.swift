@@ -6,7 +6,15 @@ struct MockInterviewView: View {
     @EnvironmentObject private var viewModel: AppViewModel
     @State private var type = "Civil Service"
     @State private var mode = "Executive panel simulation"
-    @State private var answer = ""
+    @State private var answer = """
+    In my previous role, I worked on a service improvement project where customer response times were slipping and stakeholders had different views on the root cause.
+
+    My task was to create a clear evidence-led recommendation that senior leaders could act on quickly. I reviewed performance data, spoke with operational colleagues, and separated issues caused by policy ambiguity from issues caused by process delays.
+
+    I then brought policy, operations, and communications colleagues together for a focused decision session. I used a short options paper to show the impact, risk, cost, and citizen experience implications of each route. This helped the group move from opinion-led debate to a shared judgement.
+
+    As a result, we agreed a revised process, reduced avoidable hand-offs, and improved weekly clearance rates. The learning for me was that strong communication is not just about presenting well; it is about structuring evidence so people can make a confident decision.
+    """
 
     private let types = ["Civil Service", "NHS", "Strengths", "Behaviour", "Fast Stream", "Blended"]
     private let modes = ["Text", "Voice", "Rapid-fire", "Executive panel simulation"]

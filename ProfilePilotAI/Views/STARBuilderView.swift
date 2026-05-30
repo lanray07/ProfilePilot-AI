@@ -5,10 +5,10 @@ struct STARBuilderView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var viewModel: AppViewModel
     @State private var competency = Competency.communicatingInfluencing
-    @State private var situation = ""
-    @State private var task = ""
-    @State private var action = ""
-    @State private var result = ""
+    @State private var situation = "A high-profile service update was at risk because policy, operations, and communications teams were working from different assumptions."
+    @State private var task = "I needed to create a shared position within two days, protect delivery confidence, and prepare a clear recommendation for senior leaders."
+    @State private var action = "I mapped the decision points, gathered the strongest evidence, chaired a focused stakeholder session, and converted technical risks into plain-language options with clear trade-offs."
+    @State private var result = "Senior leaders approved the recommendation, the update launched on schedule, and the briefing format was adopted for future urgent cross-team decisions."
 
     var body: some View {
         ScrollView {

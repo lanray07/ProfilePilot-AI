@@ -3,7 +3,22 @@ import SwiftUI
 struct JobAnalyzerView: View {
     @EnvironmentObject private var viewModel: AppViewModel
     let profile: UserProfile
-    @State private var jobAdvert = "Paste a public sector job advert here..."
+    @State private var jobAdvert = """
+    Senior Policy Officer - Public Service Delivery
+
+    We are looking for a confident policy professional to lead a workstream improving service outcomes for citizens. You will analyse complex evidence, brief senior stakeholders, coordinate delivery partners, and turn policy intent into practical recommendations.
+
+    Essential criteria:
+    - Experience using evidence to make sound recommendations.
+    - Strong written and verbal communication for senior audiences.
+    - Ability to work collaboratively across teams and manage competing deadlines.
+    - Track record of delivering improvements in a public service or regulated environment.
+
+    Behaviours assessed:
+    Communicating & Influencing, Making Effective Decisions, Delivering at Pace, Seeing the Big Picture.
+
+    Interview will include behaviour and strengths questions.
+    """
 
     var body: some View {
         ScrollView {

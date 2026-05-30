@@ -128,8 +128,18 @@ struct BehaviourLibraryView: View {
 }
 
 struct ApplicationBuilderView: View {
-    @State private var prompt = ""
-    @State private var draft = ""
+    @State private var prompt = """
+    Target role: Senior Policy Officer.
+    Key evidence: led cross-team service improvement, improved clearance rates, wrote senior briefings, managed competing deadlines, translated operational risk into clear recommendations.
+    Tone: professional, concise, evidence-led, suitable for a UK public sector supporting statement.
+    """
+    @State private var draft = """
+    I am an evidence-led public sector professional with experience turning complex operational challenges into clear recommendations for senior decision-makers. In my recent work, I coordinated policy, operations, and communications colleagues during a time-sensitive service improvement project. I used performance data and stakeholder insight to identify the core delivery risks, then produced a focused options paper that helped leaders make a timely decision.
+
+    My strengths are structured judgement, clear communication, and delivery discipline. I am confident working across teams, managing competing deadlines, and translating technical detail into practical action. I would bring a calm, service-focused approach to this role, with a strong commitment to improving outcomes for citizens.
+
+    \(ComplianceNotice.text)
+    """
     private let pdf = PDFExportService()
 
     var body: some View {
@@ -171,7 +181,7 @@ struct ApplicationBuilderView: View {
 struct ApplicationTrackerView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \JobApplication.createdAt, order: .reverse) private var applications: [JobApplication]
-    @State private var title = "Senior Policy Advisor"
+    @State private var title = "Senior Policy Officer"
     @State private var organization = "Civil Service"
 
     var body: some View {
