@@ -2,7 +2,7 @@
 
 ## iOS App Version 1.0
 
-- iPhone screenshots: upload `ProfilePilotAI/Resources/AppStore/iPhone-6.5/*.png`
+- iPhone screenshots: upload `ProfilePilotAI/Resources/AppStore/iPhone-6.5-JPEG/*.jpg`
 - iPad screenshots: upload `ProfilePilotAI/Resources/AppStore/iPad/*.png`
 - Promotional Text: use the text in `APP_STORE_CONNECT_METADATA.md`
 - Description: use the text in `APP_STORE_CONNECT_METADATA.md`

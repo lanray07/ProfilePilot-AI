@@ -221,17 +221,24 @@ Recommended order:
 
 Use:
 
-- `ProfilePilotAI/Resources/AppStore/iPhone-6.5/`
+- `ProfilePilotAI/Resources/AppStore/iPhone-6.5-JPEG/`
 - `ProfilePilotAI/Resources/AppStore/iPad/`
 - `ProfilePilotAI/Resources/Subscriptions/`
 
 ## Screenshot Upload Guidance
 
-For the iPhone 6.5-inch screenshot section shown in App Store Connect, upload files from:
+For the iPhone 6.5-inch screenshot section shown in App Store Connect, upload the JPEG files from:
 
-`ProfilePilotAI/Resources/AppStore/iPhone-6.5/`
+`ProfilePilotAI/Resources/AppStore/iPhone-6.5-JPEG/`
 
-These files are exactly `1242x2688`, which is one of the accepted sizes displayed by App Store Connect.
+These files are exactly `1242x2688`, flattened RGB JPEGs, which avoids the post-upload red validation issue that can happen with PNG channel metadata.
+
+Upload:
+- `iphone-65-01-hero-1242x2688.jpg`
+- `iphone-65-02-interview-1242x2688.jpg`
+- `iphone-65-03-voice-1242x2688.jpg`
+- `iphone-65-04-star-1242x2688.jpg`
+- `iphone-65-05-roadmap-1242x2688.jpg`
 
 For iPad screenshots, upload files from:
 

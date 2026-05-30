@@ -2,6 +2,11 @@
 
 ## iPhone
 
+- `iPhone-6.5-JPEG/iphone-65-01-hero-1242x2688.jpg`
+- `iPhone-6.5-JPEG/iphone-65-02-interview-1242x2688.jpg`
+- `iPhone-6.5-JPEG/iphone-65-03-voice-1242x2688.jpg`
+- `iPhone-6.5-JPEG/iphone-65-04-star-1242x2688.jpg`
+- `iPhone-6.5-JPEG/iphone-65-05-roadmap-1242x2688.jpg`
 - `iPhone-6.5/iphone-65-01-hero-1242x2688.png`
 - `iPhone-6.5/iphone-65-02-interview-1242x2688.png`
 - `iPhone-6.5/iphone-65-03-voice-1242x2688.png`
