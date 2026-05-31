@@ -10,7 +10,7 @@ Use this repository as the source for Xcode Cloud in App Store Connect.
 - App target: `ProfilePilot AI`
 - Bundle identifier: `com.profilepilotai.app`
 - Version: `1.0`
-- Build: `3`
+- Build: `4`
 
 ## App Store Connect Workflow
 
@@ -31,7 +31,7 @@ Use this repository as the source for Xcode Cloud in App Store Connect.
 
 ## GitHub Actions App Store Upload
 
-The repository also includes `.github/workflows/ios-build.yml`.
+The repository also includes `.github/workflows/ios-build.yml`. The workflow uses GitHub's `macos-26` hosted runner so App Store uploads are built with the iOS 26 SDK required by App Store Connect.
 
 For simulator validation, the workflow runs automatically on pushes to `main`.
 
