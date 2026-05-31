@@ -46,7 +46,11 @@ App Store Connect API secrets:
 
 Accepted aliases include `TEAM_ID`, `APPSTORE_API_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ID`, `ASC_API_KEY_ID`, `KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APP_STORE_CONNECT_API_ISSUER_ID`, `ASC_API_ISSUER_ID`, `ISSUER_ID`, `APPSTORE_API_PRIVATE_KEY`, `APP_STORE_CONNECT_API_PRIVATE_KEY`, `ASC_API_PRIVATE_KEY`, and `PRIVATE_KEY`.
 
-Distribution signing secrets:
+Distribution signing:
+
+The GitHub Actions upload job first tries to use the App Store Connect API key to create a short-lived Apple Distribution certificate and an App Store provisioning profile for `com.profilepilotai.app`. This avoids storing certificate files in GitHub Secrets.
+
+If Apple rejects API certificate/profile creation for the account, add these fallback secrets:
 
 - `IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64`: Base64 text for an Apple Distribution `.p12` certificate.
 - `IOS_DISTRIBUTION_CERTIFICATE_PASSWORD`: Password for the `.p12` certificate, if one was set.
