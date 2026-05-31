@@ -177,11 +177,7 @@ jobs:
           GENERATED_P12_PASSWORD="$(uuidgen)"
 
           json_get() {
-            /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); path='$1'.split('.'); value=data
-for key in path:
-    if key:
-        value=value[key]
-print(value)"
+            /usr/bin/python3 -c "import functools,json,operator,sys; data=json.load(sys.stdin); print(functools.reduce(operator.getitem, '$1'.split('.'), data))"
           }
 
           json_get_first_id() {
