@@ -49,4 +49,5 @@ Update this before release if remote AI, analytics, accounts, crash reporting, o
 - `profilepilot.professional.yearly`
 - `profilepilot.accelerator.monthly`
 
-Use subscription screenshots from `ProfilePilotAI/Resources/Subscriptions/`.
+Use review screenshots from `ProfilePilotAI/Resources/Subscriptions/ReviewScreenshots/*.jpg`.
+Use optional 1024 x 1024 subscription images from `ProfilePilotAI/Resources/Subscriptions/OptionalImages/*.jpg`.

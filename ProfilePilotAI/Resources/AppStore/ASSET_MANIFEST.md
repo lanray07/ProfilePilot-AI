@@ -34,5 +34,11 @@
 - `../Subscriptions/professional-monthly-1600x1200.png`
 - `../Subscriptions/professional-yearly-1600x1200.png`
 - `../Subscriptions/career-accelerator-1600x1200.png`
+- `../Subscriptions/ReviewScreenshots/professional-monthly-review-1242x2688.jpg`
+- `../Subscriptions/ReviewScreenshots/professional-yearly-review-1242x2688.jpg`
+- `../Subscriptions/ReviewScreenshots/career-accelerator-review-1242x2688.jpg`
+- `../Subscriptions/OptionalImages/professional-monthly-1024x1024.jpg`
+- `../Subscriptions/OptionalImages/professional-yearly-1024x1024.jpg`
+- `../Subscriptions/OptionalImages/career-accelerator-1024x1024.jpg`
 
 All artwork is logo-safe and avoids implying affiliation with government departments, the NHS, or recruitment bodies.
