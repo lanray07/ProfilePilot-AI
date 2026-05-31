@@ -40,7 +40,9 @@ jobs:
   app-store-archive:
     name: Archive and Upload to App Store Connect
     runs-on: macos-15
-    if: github.event_name == 'workflow_dispatch' && inputs.upload_to_app_store_connect
+    if: |
+      (github.event_name == 'workflow_dispatch' && inputs.upload_to_app_store_connect) ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[upload-asc]'))
 
     steps:
       - name: Checkout
