@@ -165,6 +165,8 @@ jobs:
 
       - name: Install signing assets
         run: |
+          set -o pipefail
+
           CERTIFICATE_PATH="$RUNNER_TEMP/distribution.p12"
           CERTIFICATE_KEY_PATH="$RUNNER_TEMP/distribution.key"
           CERTIFICATE_CSR_PATH="$RUNNER_TEMP/distribution.csr"
@@ -219,8 +221,8 @@ jobs:
             fi
 
             if [ "$status" -lt 200 ] || [ "$status" -gt 299 ]; then
-              echo "App Store Connect API request failed: $method $path ($status)"
-              cat "$response"
+              echo "App Store Connect API request failed: $method $path ($status)" >&2
+              cat "$response" >&2
               exit 1
             fi
 
