@@ -42,6 +42,6 @@ For an App Store Connect upload, add these GitHub repository secrets, then run t
 - `APPSTORE_ISSUER_ID`: App Store Connect API issuer ID.
 - `APPSTORE_PRIVATE_KEY`: Full `.p8` private key contents.
 
-Accepted aliases are `TEAM_ID`, `ASC_KEY_ID`, `APP_STORE_CONNECT_KEY_ID`, `APPSTORECONNECT_KEY_ID`, `ASC_ISSUER_ID`, `APP_STORE_CONNECT_ISSUER_ID`, `APPSTORECONNECT_ISSUER_ID`, `ASC_PRIVATE_KEY`, `APP_STORE_CONNECT_PRIVATE_KEY`, and `APPSTORECONNECT_PRIVATE_KEY`.
+Accepted aliases include `TEAM_ID`, `APPSTORE_API_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ID`, `ASC_API_KEY_ID`, `KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APP_STORE_CONNECT_API_ISSUER_ID`, `ASC_API_ISSUER_ID`, `ISSUER_ID`, `APPSTORE_API_PRIVATE_KEY`, `APP_STORE_CONNECT_API_PRIVATE_KEY`, `ASC_API_PRIVATE_KEY`, and `PRIVATE_KEY`.
 
 The manual upload job archives the `ProfilePilot AI` shared scheme, exports an App Store Connect IPA, stores the IPA as a GitHub artifact, and uploads it to App Store Connect.
