@@ -191,9 +191,12 @@ jobs:
             now=$(date +%s)
             exp=$((now + 1200))
             b64url() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
+            der_to_raw_ecdsa() {
+              /usr/bin/python3 -c "exec(\"import sys\\ndata=sys.stdin.buffer.read()\\npos=0\\ndef read_len():\\n    global pos\\n    length=data[pos]\\n    pos+=1\\n    if length & 0x80:\\n        size=length & 0x7f\\n        length=int.from_bytes(data[pos:pos+size], 'big')\\n        pos+=size\\n    return length\\nif data[pos] != 0x30:\\n    raise SystemExit('Expected ECDSA DER sequence')\\npos+=1\\nread_len()\\ndef read_int():\\n    global pos\\n    if data[pos] != 0x02:\\n        raise SystemExit('Expected ECDSA DER integer')\\n    pos+=1\\n    length=read_len()\\n    value=int.from_bytes(data[pos:pos+length], 'big')\\n    pos+=length\\n    return value\\nr=read_int()\\ns=read_int()\\nsys.stdout.buffer.write(r.to_bytes(32, 'big') + s.to_bytes(32, 'big'))\")"
+            }
             header=$(printf '{"alg":"ES256","kid":"%s","typ":"JWT"}' "$APPSTORE_KEY_ID" | b64url)
             payload=$(printf '{"iss":"%s","iat":%s,"exp":%s,"aud":"appstoreconnect-v1"}' "$APPSTORE_ISSUER_ID" "$now" "$exp" | b64url)
-            signature=$(printf "%s.%s" "$header" "$payload" | openssl dgst -binary -sha256 -sign "$RUNNER_TEMP/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8" | b64url)
+            signature=$(printf "%s.%s" "$header" "$payload" | openssl dgst -binary -sha256 -sign "$RUNNER_TEMP/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8" | der_to_raw_ecdsa | b64url)
             printf "%s.%s.%s" "$header" "$payload" "$signature"
           }
 
