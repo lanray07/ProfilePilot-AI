@@ -94,7 +94,11 @@ jobs:
             for candidate_name in "$@"; do
               local candidate_value="${!candidate_name}"
               if [ -n "$candidate_value" ]; then
-                echo "$output_name=$candidate_value" >> "$GITHUB_ENV"
+                {
+                  echo "$output_name<<__${output_name}_VALUE__"
+                  echo "$candidate_value"
+                  echo "__${output_name}_VALUE__"
+                } >> "$GITHUB_ENV"
                 echo "Using $candidate_name for $output_name"
                 return 0
               fi
