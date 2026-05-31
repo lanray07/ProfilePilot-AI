@@ -10,7 +10,7 @@ Use this repository as the source for Xcode Cloud in App Store Connect.
 - App target: `ProfilePilot AI`
 - Bundle identifier: `com.profilepilot.ai`
 - Version: `1.0`
-- Build: `1`
+- Build: `2`
 
 ## App Store Connect Workflow
 
@@ -28,3 +28,18 @@ Use this repository as the source for Xcode Cloud in App Store Connect.
 - The app supports iPhone and iPad through `TARGETED_DEVICE_FAMILY = 1,2`.
 - Microphone and speech recognition usage strings are already in `Info.plist`.
 - Subscription product IDs are prepared in App Store Connect and referenced in the repo metadata.
+
+## GitHub Actions App Store Upload
+
+The repository also includes `.github/workflows/ios-build.yml`.
+
+For simulator validation, the workflow runs automatically on pushes to `main`.
+
+For an App Store Connect upload, add these GitHub repository secrets, then run the workflow manually and set `upload_to_app_store_connect` to `true`:
+
+- `APPLE_TEAM_ID`: Apple Developer Program Team ID.
+- `APPSTORE_KEY_ID`: App Store Connect API key ID.
+- `APPSTORE_ISSUER_ID`: App Store Connect API issuer ID.
+- `APPSTORE_PRIVATE_KEY`: Full `.p8` private key contents.
+
+The manual upload job archives the `ProfilePilot AI` shared scheme, exports an App Store Connect IPA, stores the IPA as a GitHub artifact, and uploads it to App Store Connect.
