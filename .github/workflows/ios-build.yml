@@ -232,6 +232,55 @@ jobs:
             cat "$response"
           }
 
+          asc_request_allow_error() {
+            local method="$1"
+            local path="$2"
+            local body="${3:-}"
+            local response="$4"
+            local status
+
+            if [ -n "$body" ]; then
+              status=$(curl -sS -o "$response" -w "%{http_code}" \
+                -X "$method" \
+                -H "Authorization: Bearer $ASC_JWT" \
+                -H "Content-Type: application/json" \
+                -H "Accept: application/json" \
+                -d "$body" \
+                "https://api.appstoreconnect.apple.com$path")
+            else
+              status=$(curl -sS -o "$response" -w "%{http_code}" \
+                -X "$method" \
+                -H "Authorization: Bearer $ASC_JWT" \
+                -H "Accept: application/json" \
+                "https://api.appstoreconnect.apple.com$path")
+            fi
+
+            printf "%s" "$status"
+          }
+
+          create_distribution_certificate() {
+            local response="$RUNNER_TEMP/create-certificate.json"
+            local status
+            status=$(asc_request_allow_error POST "/v1/certificates" "$CERT_BODY" "$response")
+            cat "$response"
+            return $([ "$status" -ge 200 ] && [ "$status" -le 299 ]; echo $?)
+          }
+
+          delete_current_distribution_certificates() {
+            local response="$RUNNER_TEMP/list-certificates.json"
+            local ids
+            asc_request GET "/v1/certificates?filter%5BcertificateType%5D=IOS_DISTRIBUTION&limit=200" > "$response"
+            ids=$(/usr/bin/python3 -c "import json,sys; data=json.load(open('$response')); print(' '.join(item['id'] for item in data.get('data', [])))")
+            if [ -z "$ids" ]; then
+              echo "No current iOS Distribution certificates were returned by App Store Connect."
+              return 1
+            fi
+            for id in $ids; do
+              echo "Deleting existing iOS Distribution certificate $id so CI can recreate a usable signing certificate."
+              asc_request DELETE "/v1/certificates/$id" > /dev/null
+            done
+          }
+
           if [ "$SIGNING_ASSET_MODE" = "provided" ]; then
             printf "%s" "$IOS_CERTIFICATE_P12_BASE64" | /usr/bin/base64 -D > "$CERTIFICATE_PATH"
             printf "%s" "$IOS_PROVISIONING_PROFILE_BASE64" | /usr/bin/base64 -D > "$PROFILE_PATH"
@@ -242,7 +291,15 @@ jobs:
             openssl req -new -key "$CERTIFICATE_KEY_PATH" -out "$CERTIFICATE_CSR_PATH" -subj "/CN=ProfilePilot AI GitHub Actions"
             CSR_CONTENT=$(/usr/bin/python3 -c "import json,pathlib; print(json.dumps(pathlib.Path('$CERTIFICATE_CSR_PATH').read_text())[1:-1])")
             CERT_BODY="{\"data\":{\"type\":\"certificates\",\"attributes\":{\"certificateType\":\"IOS_DISTRIBUTION\",\"csrContent\":\"$CSR_CONTENT\"}}}"
-            CERT_RESPONSE=$(asc_request POST "/v1/certificates" "$CERT_BODY")
+            if ! CERT_RESPONSE=$(create_distribution_certificate); then
+              if printf "%s" "$CERT_RESPONSE" | grep -q "already have a current iOS Distribution certificate"; then
+                delete_current_distribution_certificates
+                CERT_RESPONSE=$(create_distribution_certificate)
+              else
+                echo "$CERT_RESPONSE" >&2
+                exit 1
+              fi
+            fi
             CERTIFICATE_ID=$(printf "%s" "$CERT_RESPONSE" | json_get "data.id")
             CERTIFICATE_CONTENT=$(printf "%s" "$CERT_RESPONSE" | json_get "data.attributes.certificateContent")
 
