@@ -20,6 +20,7 @@ jobs:
           APP_ID: "6775007316"
           TARGET_VERSION: "1.0"
           TARGET_BUILD_NUMBER: "5"
+          EXISTING_REVIEW_SUBMISSION_ID: "baee09f4-e338-45c1-97c7-a0f1589c697d"
           APPSTORE_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APPSTORE_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APPSTORE_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
@@ -108,17 +109,8 @@ jobs:
           request PATCH "/appStoreReviewDetails/$REVIEW_DETAIL_ID" \
             "{\"data\":{\"type\":\"appStoreReviewDetails\",\"id\":\"$REVIEW_DETAIL_ID\",\"attributes\":{\"notes\":$ESCAPED_NOTES}}}" > /dev/null
 
-          SUBMISSIONS_RESPONSE=$(request GET "/apps/$APP_ID/reviewSubmissions?fields%5BreviewSubmissions%5D=state,submittedDate&limit=20")
-          SUBMISSION_ID=$(printf "%s" "$SUBMISSIONS_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); candidates=[item for item in data.get('data', []) if not item.get('attributes', {}).get('submittedDate') and item.get('attributes', {}).get('state') not in {'WAITING_FOR_REVIEW','IN_REVIEW','ACCEPTED','REJECTED','DEVELOPER_REJECTED','CANCELED'}]; print(candidates[0]['id'] if candidates else '')")
-          if [ -z "$SUBMISSION_ID" ]; then
-            SUBMISSION_RESPONSE=$(request POST "/reviewSubmissions" \
-              "{\"data\":{\"type\":\"reviewSubmissions\",\"relationships\":{\"app\":{\"data\":{\"type\":\"apps\",\"id\":\"$APP_ID\"}}}}}")
-            SUBMISSION_ID=$(printf "%s" "$SUBMISSION_RESPONSE" | json_get "data.id")
-          fi
+          SUBMISSION_ID="$EXISTING_REVIEW_SUBMISSION_ID"
           echo "Review submission ID: $SUBMISSION_ID"
-
-          request POST "/reviewSubmissionItems" \
-            "{\"data\":{\"type\":\"reviewSubmissionItems\",\"relationships\":{\"reviewSubmission\":{\"data\":{\"type\":\"reviewSubmissions\",\"id\":\"$SUBMISSION_ID\"}},\"appStoreVersion\":{\"data\":{\"type\":\"appStoreVersions\",\"id\":\"$VERSION_ID\"}}}}}" > /dev/null
 
           request PATCH "/reviewSubmissions/$SUBMISSION_ID" \
             "{\"data\":{\"type\":\"reviewSubmissions\",\"id\":\"$SUBMISSION_ID\",\"attributes\":{\"submitted\":true}}}" > /dev/null
