@@ -101,6 +101,37 @@ jobs:
             cat "$response"
           }
 
+          submit_with_readiness_retry() {
+            local submission_id="$1"
+            local body="{\"data\":{\"type\":\"reviewSubmissions\",\"id\":\"$submission_id\",\"attributes\":{\"submitted\":true}}}"
+            local response="$RUNNER_TEMP/asc-submit-response.json"
+            local status
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
+              status=$(curl -sS -o "$response" -w "%{http_code}" \
+                -X PATCH \
+                -H "Authorization: Bearer $JWT" \
+                -H "Content-Type: application/json" \
+                -H "Accept: application/json" \
+                -d "$body" \
+                "$API/reviewSubmissions/$submission_id")
+              if [ "$status" -ge 200 ] && [ "$status" -le 299 ]; then
+                cat "$response"
+                return 0
+              fi
+              if [ "$status" -eq 409 ] && grep -q "try again later" "$response"; then
+                echo "App Store Connect says the version is not ready yet; retry $attempt/10 after 60 seconds."
+                sleep 60
+                continue
+              fi
+              echo "ASC request failed: PATCH /reviewSubmissions/$submission_id ($status)" >&2
+              cat "$response" >&2
+              exit 1
+            done
+            echo "ASC submission did not become ready after retrying." >&2
+            cat "$response" >&2
+            exit 1
+          }
+
           json_get() {
             /usr/bin/python3 -c "import functools,json,operator,sys; data=json.load(sys.stdin); print(functools.reduce(operator.getitem, '$1'.split('.'), data))"
           }
@@ -137,7 +168,6 @@ jobs:
           SUBMISSION_ID="$EXISTING_REVIEW_SUBMISSION_ID"
           echo "Review submission ID: $SUBMISSION_ID"
 
-          request PATCH "/reviewSubmissions/$SUBMISSION_ID" \
-            "{\"data\":{\"type\":\"reviewSubmissions\",\"id\":\"$SUBMISSION_ID\",\"attributes\":{\"submitted\":true}}}" > /dev/null
+          submit_with_readiness_retry "$SUBMISSION_ID" > /dev/null
 
           echo "Submitted ProfilePilot AI $TARGET_VERSION build $TARGET_BUILD_NUMBER for App Review."
