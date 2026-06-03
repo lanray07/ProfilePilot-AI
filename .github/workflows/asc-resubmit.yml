@@ -76,6 +76,31 @@ jobs:
             cat "$response"
           }
 
+          request_allow_already_set() {
+            local method="$1"
+            local path="$2"
+            local body="$3"
+            local response="$RUNNER_TEMP/asc-response-allow.json"
+            local status
+            status=$(curl -sS -o "$response" -w "%{http_code}" \
+              -X "$method" \
+              -H "Authorization: Bearer $JWT" \
+              -H "Content-Type: application/json" \
+              -H "Accept: application/json" \
+              -d "$body" \
+              "$API$path")
+            if [ "$status" -eq 409 ] && grep -q "already set" "$response"; then
+              cat "$response"
+              return 0
+            fi
+            if [ "$status" -lt 200 ] || [ "$status" -gt 299 ]; then
+              echo "ASC request failed: $method $path ($status)" >&2
+              cat "$response" >&2
+              exit 1
+            fi
+            cat "$response"
+          }
+
           json_get() {
             /usr/bin/python3 -c "import functools,json,operator,sys; data=json.load(sys.stdin); print(functools.reduce(operator.getitem, '$1'.split('.'), data))"
           }
@@ -96,7 +121,7 @@ jobs:
           fi
           echo "Build ID: $BUILD_ID"
 
-          request PATCH "/builds/$BUILD_ID" \
+          request_allow_already_set PATCH "/builds/$BUILD_ID" \
             "{\"data\":{\"type\":\"builds\",\"id\":\"$BUILD_ID\",\"attributes\":{\"usesNonExemptEncryption\":false}}}" > /dev/null
 
           request PATCH "/appStoreVersions/$VERSION_ID/relationships/build" \
