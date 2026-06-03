@@ -95,6 +95,9 @@ jobs:
           fi
           echo "Build ID: $BUILD_ID"
 
+          request PATCH "/builds/$BUILD_ID" \
+            "{\"data\":{\"type\":\"builds\",\"id\":\"$BUILD_ID\",\"attributes\":{\"usesNonExemptEncryption\":false}}}" > /dev/null
+
           request PATCH "/appStoreVersions/$VERSION_ID/relationships/build" \
             "{\"data\":{\"type\":\"builds\",\"id\":\"$BUILD_ID\"}}" > /dev/null
 
@@ -105,9 +108,13 @@ jobs:
           request PATCH "/appStoreReviewDetails/$REVIEW_DETAIL_ID" \
             "{\"data\":{\"type\":\"appStoreReviewDetails\",\"id\":\"$REVIEW_DETAIL_ID\",\"attributes\":{\"notes\":$ESCAPED_NOTES}}}" > /dev/null
 
-          SUBMISSION_RESPONSE=$(request POST "/reviewSubmissions" \
-            "{\"data\":{\"type\":\"reviewSubmissions\",\"relationships\":{\"app\":{\"data\":{\"type\":\"apps\",\"id\":\"$APP_ID\"}}}}}")
-          SUBMISSION_ID=$(printf "%s" "$SUBMISSION_RESPONSE" | json_get "data.id")
+          SUBMISSIONS_RESPONSE=$(request GET "/apps/$APP_ID/reviewSubmissions?fields%5BreviewSubmissions%5D=state,submittedDate&limit=20")
+          SUBMISSION_ID=$(printf "%s" "$SUBMISSIONS_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); candidates=[item for item in data.get('data', []) if not item.get('attributes', {}).get('submittedDate') and item.get('attributes', {}).get('state') not in {'WAITING_FOR_REVIEW','IN_REVIEW','ACCEPTED','REJECTED','DEVELOPER_REJECTED','CANCELED'}]; print(candidates[0]['id'] if candidates else '')")
+          if [ -z "$SUBMISSION_ID" ]; then
+            SUBMISSION_RESPONSE=$(request POST "/reviewSubmissions" \
+              "{\"data\":{\"type\":\"reviewSubmissions\",\"relationships\":{\"app\":{\"data\":{\"type\":\"apps\",\"id\":\"$APP_ID\"}}}}}")
+            SUBMISSION_ID=$(printf "%s" "$SUBMISSION_RESPONSE" | json_get "data.id")
+          fi
           echo "Review submission ID: $SUBMISSION_ID"
 
           request POST "/reviewSubmissionItems" \
