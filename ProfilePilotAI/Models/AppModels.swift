@@ -54,6 +54,19 @@ enum SubscriptionPlan: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    var productID: String? {
+        switch self {
+        case .free:
+            return nil
+        case .professionalMonthly:
+            return "profilepilot.professional.monthly"
+        case .professionalYearly:
+            return "profilepilot.professional.yearly"
+        case .acceleratorMonthly:
+            return "profilepilot.accelerator.monthly"
+        }
+    }
+
     var price: String {
         switch self {
         case .free:
