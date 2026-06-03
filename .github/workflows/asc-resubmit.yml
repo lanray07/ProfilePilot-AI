@@ -132,6 +132,37 @@ jobs:
             exit 1
           }
 
+          submit_version_with_readiness_retry() {
+            local version_id="$1"
+            local body="{\"data\":{\"type\":\"appStoreVersionSubmissions\",\"relationships\":{\"appStoreVersion\":{\"data\":{\"type\":\"appStoreVersions\",\"id\":\"$version_id\"}}}}}"
+            local response="$RUNNER_TEMP/asc-version-submit-response.json"
+            local status
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
+              status=$(curl -sS -o "$response" -w "%{http_code}" \
+                -X POST \
+                -H "Authorization: Bearer $JWT" \
+                -H "Content-Type: application/json" \
+                -H "Accept: application/json" \
+                -d "$body" \
+                "$API/appStoreVersionSubmissions")
+              if [ "$status" -ge 200 ] && [ "$status" -le 299 ]; then
+                cat "$response"
+                return 0
+              fi
+              if [ "$status" -eq 409 ] && grep -q "try again later" "$response"; then
+                echo "App Store Connect says the version is not ready yet; retry $attempt/10 after 60 seconds."
+                sleep 60
+                continue
+              fi
+              echo "ASC request failed: POST /appStoreVersionSubmissions ($status)" >&2
+              cat "$response" >&2
+              exit 1
+            done
+            echo "ASC version submission did not become ready after retrying." >&2
+            cat "$response" >&2
+            exit 1
+          }
+
           json_get() {
             /usr/bin/python3 -c "import functools,json,operator,sys; data=json.load(sys.stdin); print(functools.reduce(operator.getitem, '$1'.split('.'), data))"
           }
@@ -165,25 +196,6 @@ jobs:
           request PATCH "/appStoreReviewDetails/$REVIEW_DETAIL_ID" \
             "{\"data\":{\"type\":\"appStoreReviewDetails\",\"id\":\"$REVIEW_DETAIL_ID\",\"attributes\":{\"notes\":$ESCAPED_NOTES}}}" > /dev/null
 
-          OLD_ITEMS_RESPONSE=$(request GET "/reviewSubmissions/$EXISTING_REVIEW_SUBMISSION_ID/items?limit=200")
-          OLD_ITEM_IDS=$(printf "%s" "$OLD_ITEMS_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); print(' '.join(item['id'] for item in data.get('data', [])))")
-          for item_id in $OLD_ITEM_IDS; do
-            echo "Removing stale review submission item $item_id from $EXISTING_REVIEW_SUBMISSION_ID"
-            request DELETE "/reviewSubmissionItems/$item_id" > /dev/null
-          done
-
-          SUBMISSIONS_RESPONSE=$(request GET "/apps/$APP_ID/reviewSubmissions?fields%5BreviewSubmissions%5D=state,submittedDate&limit=20")
-          SUBMISSION_ID=$(printf "%s" "$SUBMISSIONS_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); candidates=[item for item in data.get('data', []) if item.get('id') != '$EXISTING_REVIEW_SUBMISSION_ID' and not item.get('attributes', {}).get('submittedDate') and item.get('attributes', {}).get('state') not in {'WAITING_FOR_REVIEW','IN_REVIEW','ACCEPTED','REJECTED','DEVELOPER_REJECTED','CANCELED'}]; print(candidates[0]['id'] if candidates else '')")
-          if [ -z "$SUBMISSION_ID" ]; then
-            SUBMISSION_RESPONSE=$(request POST "/reviewSubmissions" \
-              "{\"data\":{\"type\":\"reviewSubmissions\",\"relationships\":{\"app\":{\"data\":{\"type\":\"apps\",\"id\":\"$APP_ID\"}}}}}")
-            SUBMISSION_ID=$(printf "%s" "$SUBMISSION_RESPONSE" | json_get "data.id")
-          fi
-          echo "Review submission ID: $SUBMISSION_ID"
-
-          request POST "/reviewSubmissionItems" \
-            "{\"data\":{\"type\":\"reviewSubmissionItems\",\"relationships\":{\"reviewSubmission\":{\"data\":{\"type\":\"reviewSubmissions\",\"id\":\"$SUBMISSION_ID\"}},\"appStoreVersion\":{\"data\":{\"type\":\"appStoreVersions\",\"id\":\"$VERSION_ID\"}}}}}" > /dev/null
-
-          submit_with_readiness_retry "$SUBMISSION_ID" > /dev/null
+          submit_version_with_readiness_retry "$VERSION_ID" > /dev/null
 
           echo "Submitted ProfilePilot AI $TARGET_VERSION build $TARGET_BUILD_NUMBER for App Review."
