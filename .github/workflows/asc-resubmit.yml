@@ -165,8 +165,8 @@ jobs:
           request PATCH "/appStoreReviewDetails/$REVIEW_DETAIL_ID" \
             "{\"data\":{\"type\":\"appStoreReviewDetails\",\"id\":\"$REVIEW_DETAIL_ID\",\"attributes\":{\"notes\":$ESCAPED_NOTES}}}" > /dev/null
 
-          OLD_ITEMS_RESPONSE=$(request GET "/reviewSubmissions/$EXISTING_REVIEW_SUBMISSION_ID/items?fields%5BreviewSubmissionItems%5D=state,appStoreVersion&limit=200")
-          OLD_ITEM_IDS=$(printf "%s" "$OLD_ITEMS_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); print(' '.join(item['id'] for item in data.get('data', []) if ((item.get('relationships', {}).get('appStoreVersion', {}).get('data') or {}).get('id') == '$VERSION_ID')))")
+          OLD_ITEMS_RESPONSE=$(request GET "/reviewSubmissions/$EXISTING_REVIEW_SUBMISSION_ID/items?limit=200")
+          OLD_ITEM_IDS=$(printf "%s" "$OLD_ITEMS_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); print(' '.join(item['id'] for item in data.get('data', [])))")
           for item_id in $OLD_ITEM_IDS; do
             echo "Removing stale review submission item $item_id from $EXISTING_REVIEW_SUBMISSION_ID"
             request DELETE "/reviewSubmissionItems/$item_id" > /dev/null
