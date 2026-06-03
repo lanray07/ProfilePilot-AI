@@ -165,8 +165,24 @@ jobs:
           request PATCH "/appStoreReviewDetails/$REVIEW_DETAIL_ID" \
             "{\"data\":{\"type\":\"appStoreReviewDetails\",\"id\":\"$REVIEW_DETAIL_ID\",\"attributes\":{\"notes\":$ESCAPED_NOTES}}}" > /dev/null
 
-          SUBMISSION_ID="$EXISTING_REVIEW_SUBMISSION_ID"
+          OLD_ITEMS_RESPONSE=$(request GET "/reviewSubmissions/$EXISTING_REVIEW_SUBMISSION_ID/items?fields%5BreviewSubmissionItems%5D=state,appStoreVersion&limit=200")
+          OLD_ITEM_IDS=$(printf "%s" "$OLD_ITEMS_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); print(' '.join(item['id'] for item in data.get('data', []) if ((item.get('relationships', {}).get('appStoreVersion', {}).get('data') or {}).get('id') == '$VERSION_ID')))")
+          for item_id in $OLD_ITEM_IDS; do
+            echo "Removing stale review submission item $item_id from $EXISTING_REVIEW_SUBMISSION_ID"
+            request DELETE "/reviewSubmissionItems/$item_id" > /dev/null
+          done
+
+          SUBMISSIONS_RESPONSE=$(request GET "/apps/$APP_ID/reviewSubmissions?fields%5BreviewSubmissions%5D=state,submittedDate&limit=20")
+          SUBMISSION_ID=$(printf "%s" "$SUBMISSIONS_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); candidates=[item for item in data.get('data', []) if item.get('id') != '$EXISTING_REVIEW_SUBMISSION_ID' and not item.get('attributes', {}).get('submittedDate') and item.get('attributes', {}).get('state') not in {'WAITING_FOR_REVIEW','IN_REVIEW','ACCEPTED','REJECTED','DEVELOPER_REJECTED','CANCELED'}]; print(candidates[0]['id'] if candidates else '')")
+          if [ -z "$SUBMISSION_ID" ]; then
+            SUBMISSION_RESPONSE=$(request POST "/reviewSubmissions" \
+              "{\"data\":{\"type\":\"reviewSubmissions\",\"relationships\":{\"app\":{\"data\":{\"type\":\"apps\",\"id\":\"$APP_ID\"}}}}}")
+            SUBMISSION_ID=$(printf "%s" "$SUBMISSION_RESPONSE" | json_get "data.id")
+          fi
           echo "Review submission ID: $SUBMISSION_ID"
+
+          request POST "/reviewSubmissionItems" \
+            "{\"data\":{\"type\":\"reviewSubmissionItems\",\"relationships\":{\"reviewSubmission\":{\"data\":{\"type\":\"reviewSubmissions\",\"id\":\"$SUBMISSION_ID\"}},\"appStoreVersion\":{\"data\":{\"type\":\"appStoreVersions\",\"id\":\"$VERSION_ID\"}}}}}" > /dev/null
 
           submit_with_readiness_retry "$SUBMISSION_ID" > /dev/null
 
