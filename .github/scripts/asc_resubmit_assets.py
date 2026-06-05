@@ -392,7 +392,7 @@ def attach_build_and_review_notes(version_id, build_id):
 
 
 def submit_with_retry(version_id):
-    submission_id = create_review_submission()
+    submission_id = create_review_submission(version_id)
     add_review_submission_item(submission_id, version_id)
 
     body = {
@@ -400,11 +400,6 @@ def submit_with_retry(version_id):
             "type": "reviewSubmissions",
             "id": submission_id,
             "attributes": {"submitted": True},
-            "relationships": {
-                "appStoreVersionForReview": {
-                    "data": {"type": "appStoreVersions", "id": version_id}
-                }
-            },
         }
     }
     for attempt in range(1, 16):
@@ -422,12 +417,17 @@ def submit_with_retry(version_id):
     raise RuntimeError("App Store version did not become ready for submission.")
 
 
-def create_review_submission():
+def create_review_submission(version_id):
     body = {
         "data": {
             "type": "reviewSubmissions",
             "attributes": {"platform": "IOS"},
-            "relationships": {"app": {"data": {"type": "apps", "id": APP_ID}}},
+            "relationships": {
+                "app": {"data": {"type": "apps", "id": APP_ID}},
+                "appStoreVersionForReview": {
+                    "data": {"type": "appStoreVersions", "id": version_id}
+                },
+            },
         }
     }
     try:
