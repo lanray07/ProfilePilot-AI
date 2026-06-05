@@ -400,6 +400,11 @@ def submit_with_retry(version_id):
             "type": "reviewSubmissions",
             "id": submission_id,
             "attributes": {"submitted": True},
+            "relationships": {
+                "appStoreVersionForReview": {
+                    "data": {"type": "appStoreVersions", "id": version_id}
+                }
+            },
         }
     }
     for attempt in range(1, 16):
