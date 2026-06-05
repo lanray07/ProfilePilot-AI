@@ -54,6 +54,12 @@ enum SubscriptionPlan: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    static let storeProductIDs = [
+        SubscriptionPlan.professionalMonthly,
+        .professionalYearly,
+        .acceleratorMonthly
+    ].compactMap(\.productID)
+
     var productID: String? {
         switch self {
         case .free:

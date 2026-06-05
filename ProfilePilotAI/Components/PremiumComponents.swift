@@ -1,4 +1,5 @@
 import Charts
+import StoreKit
 import SwiftUI
 
 enum PremiumTheme {
@@ -342,68 +343,50 @@ struct ShareCardPreview: View {
 
 struct PaywallView: View {
     @StateObject private var subscription = SubscriptionService()
-    @State private var alert: PaywallAlert?
+    private let privacyURL = URL(string: "https://github.com/lanray07/ProfilePilot-AI/blob/main/PRIVACY_POLICY.md")!
+    private let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 
     var body: some View {
-        ScrollView {
+        SubscriptionStoreView(productIDs: SubscriptionPlan.storeProductIDs) {
             VStack(alignment: .leading, spacing: 18) {
                 Text("Upgrade Your Public Sector Campaign")
                     .font(.largeTitle.bold())
                     .foregroundStyle(PremiumTheme.ink)
                 Text("Unlimited coaching, voice interviews, advanced analytics, executive modes, and premium templates.")
                     .foregroundStyle(PremiumTheme.muted)
-                ForEach([SubscriptionPlan.professionalMonthly, .professionalYearly, .acceleratorMonthly]) { plan in
-                    PremiumDashboardCard(title: plan.rawValue, subtitle: subscription.displayPrice(for: plan), icon: plan == .acceleratorMonthly ? "crown" : "briefcase") {
-                        Image(plan == .acceleratorMonthly ? "SubscriptionAccelerator" : "SubscriptionProfessional")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(height: 150)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.white.opacity(0.12)))
-                        PremiumButton(
-                            title: subscription.purchasingPlan == plan ? "Connecting..." : "Choose Plan",
-                            icon: subscription.purchasingPlan == plan ? "hourglass" : "checkmark"
-                        ) {
-                            Task { await choose(plan) }
-                        }
-                    }
-                }
+                Image("SubscriptionProfessional")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 190)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(.white.opacity(0.12)))
+                Text("Professional Monthly and Professional Yearly include AI coaching, STAR examples, interview practice, and progress planning.")
+                    .font(.callout)
+                    .foregroundStyle(PremiumTheme.ink.opacity(0.9))
                 Text(ComplianceNotice.text)
                     .font(.footnote)
                     .foregroundStyle(PremiumTheme.muted)
+                HStack(spacing: 14) {
+                    Link("Privacy Policy", destination: privacyURL)
+                    Link("Terms of Use", destination: termsURL)
+                }
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(PremiumTheme.gold)
             }
             .padding()
         }
         .background(PremiumBackground())
         .navigationTitle("Plans")
-        .alert(item: $alert) { alert in
-            Alert(title: Text(alert.title), message: Text(alert.message), dismissButton: .default(Text("OK")))
-        }
+        .subscriptionStoreControlStyle(.buttons)
+        .subscriptionStoreButtonLabel(.multiline)
+        .subscriptionStorePolicyDestination(url: privacyURL, for: .privacyPolicy)
+        .subscriptionStorePolicyDestination(url: termsURL, for: .termsOfService)
+        .storeButton(.visible, for: .restorePurchases)
         .task {
             await subscription.loadProducts()
             await subscription.updateEntitlements()
         }
     }
-
-    private func choose(_ plan: SubscriptionPlan) async {
-        guard subscription.purchasingPlan == nil else { return }
-        do {
-            if let message = try await subscription.purchase(plan) {
-                alert = PaywallAlert(title: "Plan Selected", message: message)
-            }
-        } catch {
-            alert = PaywallAlert(
-                title: "Plan Unavailable",
-                message: error.localizedDescription
-            )
-        }
-    }
-}
-
-private struct PaywallAlert: Identifiable {
-    let id = UUID()
-    let title: String
-    let message: String
 }
 
 struct PremiumEmptyState: View {

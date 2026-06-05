@@ -67,6 +67,10 @@ ProfilePilot AI is a coaching and educational platform. It does not guarantee jo
 
 ProfilePilot AI is not affiliated with, endorsed by or connected to any government department, the NHS or recruitment body.
 
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+
+Privacy Policy: https://github.com/lanray07/ProfilePilot-AI/blob/main/PRIVACY_POLICY.md
+
 ## Keywords
 
 civil service,NHS,public sector,STAR,interview,career,applications,competency,success profiles
@@ -112,6 +116,10 @@ Email: boxoyen@gmail.com
 ## App Review Notes
 
 ProfilePilot AI is a coaching and educational app for public sector applications and interview preparation. Mock AI is enabled by default for review, so no external AI account is required. No sign-in is required. The app does not guarantee interviews, job offers, promotions or recruitment outcomes, and compliance notices are shown on generated coaching content.
+
+Build 1.0 (6) replaces the custom Choose Plan buttons with Apple's native SubscriptionStoreView for Professional Monthly, Professional Yearly, and Career Accelerator subscriptions. The purchase flow now includes visible Privacy Policy, Terms of Use, and Restore Purchases links:
+- Privacy Policy: https://github.com/lanray07/ProfilePilot-AI/blob/main/PRIVACY_POLICY.md
+- Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
 The app is not affiliated with, endorsed by, or connected to any government department, the NHS, or recruitment body. It uses local mock AI by default for review and stores user-created coaching content locally.
 
@@ -178,6 +186,8 @@ Price: GBP 12.99 per month
 
 Review screenshot: `ProfilePilotAI/Resources/Subscriptions/professional-monthly-1600x1200.png`
 
+Promotional image: `ProfilePilotAI/Resources/Subscriptions/OptionalImages/professional-monthly-1024x1024.jpg`
+
 ### Professional Yearly
 
 Product ID: `profilepilot.professional.yearly`
@@ -192,6 +202,8 @@ Price: GBP 99.99 per year
 
 Review screenshot: `ProfilePilotAI/Resources/Subscriptions/professional-yearly-1600x1200.png`
 
+Promotional image: `ProfilePilotAI/Resources/Subscriptions/OptionalImages/professional-yearly-1024x1024.jpg`
+
 ### Career Accelerator Monthly
 
 Product ID: `profilepilot.accelerator.monthly`
@@ -205,6 +217,8 @@ Description: Advanced analytics, executive coaching modes, premium templates, si
 Price: GBP 24.99 per month
 
 Review screenshot: `ProfilePilotAI/Resources/Subscriptions/career-accelerator-1600x1200.png`
+
+Promotional image: `ProfilePilotAI/Resources/Subscriptions/OptionalImages/career-accelerator-1024x1024.jpg`
 
 ## Subscription Group
 
@@ -234,14 +248,21 @@ For the iPhone 6.5-inch screenshot section shown in App Store Connect, upload th
 These files are exactly `1242x2688`, flattened RGB JPEGs, which avoids the post-upload red validation issue that can happen with PNG channel metadata.
 
 Upload:
-- `iphone-65-01-hero-1242x2688.jpg`
-- `iphone-65-02-interview-1242x2688.jpg`
-- `iphone-65-03-voice-1242x2688.jpg`
-- `iphone-65-04-star-1242x2688.jpg`
-- `iphone-65-05-roadmap-1242x2688.jpg`
+- `iphone-65-01-dashboard-1242x2688.jpg`
+- `iphone-65-02-job-analyzer-1242x2688.jpg`
+- `iphone-65-03-interview-1242x2688.jpg`
+- `iphone-65-04-star-builder-1242x2688.jpg`
+- `iphone-65-05-subscriptions-1242x2688.jpg`
 
 For iPad screenshots, upload files from:
 
-`ProfilePilotAI/Resources/AppStore/iPad/`
+`ProfilePilotAI/Resources/AppStore/iPad-JPEG/`
 
-These files are exactly `2048x2732`.
+These files are exactly `2048x2732`, flattened RGB JPEGs.
+
+Upload:
+- `ipad-01-dashboard-2048x2732.jpg`
+- `ipad-02-job-analyzer-2048x2732.jpg`
+- `ipad-03-interview-2048x2732.jpg`
+- `ipad-04-star-builder-2048x2732.jpg`
+- `ipad-05-subscriptions-2048x2732.jpg`
