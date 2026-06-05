@@ -392,15 +392,19 @@ def attach_build_and_review_notes(version_id, build_id):
 
 
 def submit_with_retry(version_id):
+    submission_id = create_review_submission()
+    add_review_submission_item(submission_id, version_id)
+
     body = {
         "data": {
-            "type": "appStoreVersionSubmissions",
-            "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": version_id}}},
+            "type": "reviewSubmissions",
+            "id": submission_id,
+            "attributes": {"submitted": True},
         }
     }
     for attempt in range(1, 16):
         try:
-            asc.request("POST", "/appStoreVersionSubmissions", body)
+            asc.request("PATCH", f"/reviewSubmissions/{submission_id}", body)
             print(f"Submitted ProfilePilot AI {TARGET_VERSION} build {TARGET_BUILD_NUMBER} for App Review.")
             return
         except RuntimeError as error:
@@ -411,6 +415,55 @@ def submit_with_retry(version_id):
                 continue
             raise
     raise RuntimeError("App Store version did not become ready for submission.")
+
+
+def create_review_submission():
+    body = {
+        "data": {
+            "type": "reviewSubmissions",
+            "attributes": {"platform": "IOS"},
+            "relationships": {"app": {"data": {"type": "apps", "id": APP_ID}}},
+        }
+    }
+    try:
+        created = asc.request("POST", "/reviewSubmissions", body)
+        submission_id = created["data"]["id"]
+        print(f"Created review submission: {submission_id}")
+        return submission_id
+    except RuntimeError as error:
+        if "409" not in str(error):
+            raise
+
+    submissions = asc.request("GET", f"/apps/{APP_ID}/reviewSubmissions?limit=20")
+    reusable_states = {"READY_FOR_REVIEW", "UNRESOLVED_ISSUES", "DEVELOPER_REJECTED"}
+    for item in submissions.get("data", []):
+        state = item.get("attributes", {}).get("state")
+        print(f"Existing review submission {item['id']} has state {state}")
+        if state in reusable_states:
+            return item["id"]
+    if submissions.get("data"):
+        return submissions["data"][0]["id"]
+    raise RuntimeError("Could not create or find a review submission.")
+
+
+def add_review_submission_item(submission_id, version_id):
+    body = {
+        "data": {
+            "type": "reviewSubmissionItems",
+            "relationships": {
+                "reviewSubmission": {"data": {"type": "reviewSubmissions", "id": submission_id}},
+                "appStoreVersion": {"data": {"type": "appStoreVersions", "id": version_id}},
+            },
+        }
+    }
+    try:
+        item = asc.request("POST", "/reviewSubmissionItems", body)
+        print(f"Added app version to review submission: {item['data']['id']}")
+    except RuntimeError as error:
+        if "409" in str(error) and ("already" in str(error).lower() or "exists" in str(error).lower()):
+            print("App version is already present in the review submission.")
+            return
+        raise
 
 
 def main():
