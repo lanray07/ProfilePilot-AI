@@ -414,6 +414,7 @@ def submit_with_retry(version_id):
             message = str(error)
             if "409" in message and ("try again later" in message or "in progress" in message):
                 print(f"Submission not ready yet, retry {attempt}/15 after 60 seconds.")
+                print(message)
                 time.sleep(60)
                 continue
             raise
@@ -504,9 +505,12 @@ def add_review_submission_item(submission_id, version_id):
 def main():
     build_id = wait_for_build()
     version_id, localization_id = version_and_localization()
-    update_version_metadata(localization_id)
-    replace_screenshots(localization_id)
-    replace_subscription_assets()
+    if os.environ.get("SKIP_ASSET_REFRESH", "").lower() == "true":
+        print("Skipping asset refresh; using existing App Store Connect metadata and media.")
+    else:
+        update_version_metadata(localization_id)
+        replace_screenshots(localization_id)
+        replace_subscription_assets()
     attach_build_and_review_notes(version_id, build_id)
     submit_with_retry(version_id)
 
