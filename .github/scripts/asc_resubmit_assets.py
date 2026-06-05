@@ -393,7 +393,10 @@ def attach_build_and_review_notes(version_id, build_id):
 
 def submit_with_retry(version_id):
     submission_id = create_review_submission(version_id)
-    add_review_submission_item(submission_id, version_id)
+    if not add_review_submission_item(submission_id, version_id):
+        submission_id = find_existing_review_submission_for_version(version_id)
+        if not submission_id:
+            raise RuntimeError("The app version is already in another submission, but that submission was not found.")
 
     body = {
         "data": {
@@ -418,7 +421,6 @@ def submit_with_retry(version_id):
 
 
 def create_review_submission(version_id):
-    delete_ready_draft_submissions()
     body = {
         "data": {
             "type": "reviewSubmissions",
@@ -440,30 +442,38 @@ def create_review_submission(version_id):
         if "409" not in str(error):
             raise
 
-    delete_ready_draft_submissions()
-    try:
-        created = asc.request("POST", "/reviewSubmissions", body)
-        submission_id = created["data"]["id"]
-        print(f"Created review submission after deleting stale drafts: {submission_id}")
-        return submission_id
-    except RuntimeError as error:
-        if "409" not in str(error):
-            raise
+    existing_id = find_existing_review_submission_for_version(version_id)
+    if existing_id:
+        print(f"Using existing review submission for version {version_id}: {existing_id}")
+        return existing_id
 
     submissions = asc.request("GET", f"/apps/{APP_ID}/reviewSubmissions?limit=20")
     for item in submissions.get("data", []):
         state = item.get("attributes", {}).get("state")
         print(f"Existing review submission {item['id']} has state {state}")
-    raise RuntimeError("Could not create or find a review submission.")
+    raise RuntimeError("Could not create or find a review submission for this app version.")
 
 
-def delete_ready_draft_submissions():
-    submissions = asc.request("GET", f"/apps/{APP_ID}/reviewSubmissions?limit=20")
+def find_existing_review_submission_for_version(version_id):
+    submissions = asc.request(
+        "GET",
+        f"/apps/{APP_ID}/reviewSubmissions?include=appStoreVersionForReview,items&limit=20",
+    )
+    included = {item["id"]: item for item in submissions.get("included", []) or []}
     for item in submissions.get("data", []):
         state = item.get("attributes", {}).get("state")
-        if state == "READY_FOR_REVIEW":
-            asc.request("DELETE", f"/reviewSubmissions/{item['id']}", ok=(204,))
-            print(f"Deleted stale READY_FOR_REVIEW review submission: {item['id']}")
+        relationship = item.get("relationships", {}).get("appStoreVersionForReview", {}).get("data")
+        relationship_id = relationship.get("id") if relationship else ""
+        print(f"Review submission {item['id']} state={state} appStoreVersionForReview={relationship_id}")
+        if relationship_id == version_id and state in {"READY_FOR_REVIEW", "UNRESOLVED_ISSUES"}:
+            return item["id"]
+
+        for item_ref in item.get("relationships", {}).get("items", {}).get("data", []) or []:
+            submission_item = included.get(item_ref["id"], {})
+            version_ref = submission_item.get("relationships", {}).get("appStoreVersion", {}).get("data")
+            if version_ref and version_ref.get("id") == version_id and state in {"READY_FOR_REVIEW", "UNRESOLVED_ISSUES"}:
+                return item["id"]
+    return ""
 
 
 def add_review_submission_item(submission_id, version_id):
@@ -479,10 +489,11 @@ def add_review_submission_item(submission_id, version_id):
     try:
         item = asc.request("POST", "/reviewSubmissionItems", body)
         print(f"Added app version to review submission: {item['data']['id']}")
+        return True
     except RuntimeError as error:
         if "409" in str(error) and ("already" in str(error).lower() or "exists" in str(error).lower()):
             print("App version is already present in the review submission.")
-            return
+            return False
         raise
 
 
