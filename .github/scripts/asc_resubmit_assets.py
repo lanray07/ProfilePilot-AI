@@ -491,9 +491,13 @@ def add_review_submission_item(submission_id, version_id):
         print(f"Added app version to review submission: {item['data']['id']}")
         return True
     except RuntimeError as error:
-        if "409" in str(error) and ("already" in str(error).lower() or "exists" in str(error).lower()):
+        message = str(error).lower()
+        if "409" in str(error) and ("already" in message or "exists" in message):
             print("App version is already present in the review submission.")
             return False
+        if "409" in str(error) and "does not allow adding more items" in message:
+            print("Review submission already has its fixed item set; continuing to submit.")
+            return True
         raise
 
 
