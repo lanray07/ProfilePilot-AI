@@ -418,6 +418,7 @@ def submit_with_retry(version_id):
 
 
 def create_review_submission(version_id):
+    delete_ready_draft_submissions()
     body = {
         "data": {
             "type": "reviewSubmissions",
@@ -439,16 +440,30 @@ def create_review_submission(version_id):
         if "409" not in str(error):
             raise
 
+    delete_ready_draft_submissions()
+    try:
+        created = asc.request("POST", "/reviewSubmissions", body)
+        submission_id = created["data"]["id"]
+        print(f"Created review submission after deleting stale drafts: {submission_id}")
+        return submission_id
+    except RuntimeError as error:
+        if "409" not in str(error):
+            raise
+
     submissions = asc.request("GET", f"/apps/{APP_ID}/reviewSubmissions?limit=20")
-    reusable_states = {"READY_FOR_REVIEW", "UNRESOLVED_ISSUES", "DEVELOPER_REJECTED"}
     for item in submissions.get("data", []):
         state = item.get("attributes", {}).get("state")
         print(f"Existing review submission {item['id']} has state {state}")
-        if state in reusable_states:
-            return item["id"]
-    if submissions.get("data"):
-        return submissions["data"][0]["id"]
     raise RuntimeError("Could not create or find a review submission.")
+
+
+def delete_ready_draft_submissions():
+    submissions = asc.request("GET", f"/apps/{APP_ID}/reviewSubmissions?limit=20")
+    for item in submissions.get("data", []):
+        state = item.get("attributes", {}).get("state")
+        if state == "READY_FOR_REVIEW":
+            asc.request("DELETE", f"/reviewSubmissions/{item['id']}", ok=(204,))
+            print(f"Deleted stale READY_FOR_REVIEW review submission: {item['id']}")
 
 
 def add_review_submission_item(submission_id, version_id):
