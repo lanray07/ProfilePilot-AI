@@ -8,194 +8,25 @@ on:
 
 jobs:
   resubmit:
-    name: Attach build and resubmit
+    name: Refresh assets and resubmit
     runs-on: macos-26
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'push' && contains(github.event.head_commit.message, '[resubmit-asc]'))
 
     steps:
-      - name: Resubmit ProfilePilot AI 1.0
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install App Store Connect upload dependencies
+        run: python3 -m pip install --user cryptography requests
+
+      - name: Refresh metadata, assets, attach build, and resubmit
         env:
           APP_ID: "6775007316"
           TARGET_VERSION: "1.0"
-          TARGET_BUILD_NUMBER: "5"
-          EXISTING_REVIEW_SUBMISSION_ID: "baee09f4-e338-45c1-97c7-a0f1589c697d"
+          TARGET_BUILD_NUMBER: "6"
           APPSTORE_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APPSTORE_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APPSTORE_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
-        run: |
-          set -euo pipefail
-
-          KEY_PATH="$RUNNER_TEMP/AuthKey_${APPSTORE_KEY_ID}.p8"
-          printf "%s" "$APPSTORE_PRIVATE_KEY" | perl -pe 's/\\n/\n/g' > "$KEY_PATH"
-
-          b64url() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
-          der_to_raw_ecdsa() {
-            /usr/bin/python3 -c "exec(\"import sys\\ndata=sys.stdin.buffer.read()\\npos=0\\ndef read_len():\\n    global pos\\n    length=data[pos]\\n    pos+=1\\n    if length & 0x80:\\n        size=length & 0x7f\\n        length=int.from_bytes(data[pos:pos+size], 'big')\\n        pos+=size\\n    return length\\nif data[pos] != 0x30:\\n    raise SystemExit('Expected ECDSA DER sequence')\\npos+=1\\nread_len()\\ndef read_int():\\n    global pos\\n    if data[pos] != 0x02:\\n        raise SystemExit('Expected ECDSA DER integer')\\n    pos+=1\\n    length=read_len()\\n    value=int.from_bytes(data[pos:pos+length], 'big')\\n    pos+=length\\n    return value\\nr=read_int()\\ns=read_int()\\nsys.stdout.buffer.write(r.to_bytes(32, 'big') + s.to_bytes(32, 'big'))\")"
-          }
-          make_jwt() {
-            local now exp header payload signature
-            now=$(date +%s)
-            exp=$((now + 1200))
-            header=$(printf '{"alg":"ES256","kid":"%s","typ":"JWT"}' "$APPSTORE_KEY_ID" | b64url)
-            payload=$(printf '{"iss":"%s","iat":%s,"exp":%s,"aud":"appstoreconnect-v1"}' "$APPSTORE_ISSUER_ID" "$now" "$exp" | b64url)
-            signature=$(printf "%s.%s" "$header" "$payload" | openssl dgst -binary -sha256 -sign "$KEY_PATH" | der_to_raw_ecdsa | b64url)
-            printf "%s.%s.%s" "$header" "$payload" "$signature"
-          }
-
-          JWT="$(make_jwt)"
-          API="https://api.appstoreconnect.apple.com/v1"
-
-          request() {
-            local method="$1"
-            local path="$2"
-            local body="${3:-}"
-            local response="$RUNNER_TEMP/asc-response.json"
-            local status
-            if [ -n "$body" ]; then
-              status=$(curl -sS -o "$response" -w "%{http_code}" \
-                -X "$method" \
-                -H "Authorization: Bearer $JWT" \
-                -H "Content-Type: application/json" \
-                -H "Accept: application/json" \
-                -d "$body" \
-                "$API$path")
-            else
-              status=$(curl -sS -o "$response" -w "%{http_code}" \
-                -X "$method" \
-                -H "Authorization: Bearer $JWT" \
-                -H "Accept: application/json" \
-                "$API$path")
-            fi
-            if [ "$status" -lt 200 ] || [ "$status" -gt 299 ]; then
-              echo "ASC request failed: $method $path ($status)" >&2
-              cat "$response" >&2
-              exit 1
-            fi
-            cat "$response"
-          }
-
-          request_allow_already_set() {
-            local method="$1"
-            local path="$2"
-            local body="$3"
-            local response="$RUNNER_TEMP/asc-response-allow.json"
-            local status
-            status=$(curl -sS -o "$response" -w "%{http_code}" \
-              -X "$method" \
-              -H "Authorization: Bearer $JWT" \
-              -H "Content-Type: application/json" \
-              -H "Accept: application/json" \
-              -d "$body" \
-              "$API$path")
-            if [ "$status" -eq 409 ] && grep -q "already set" "$response"; then
-              cat "$response"
-              return 0
-            fi
-            if [ "$status" -lt 200 ] || [ "$status" -gt 299 ]; then
-              echo "ASC request failed: $method $path ($status)" >&2
-              cat "$response" >&2
-              exit 1
-            fi
-            cat "$response"
-          }
-
-          submit_with_readiness_retry() {
-            local submission_id="$1"
-            local body="{\"data\":{\"type\":\"reviewSubmissions\",\"id\":\"$submission_id\",\"attributes\":{\"submitted\":true}}}"
-            local response="$RUNNER_TEMP/asc-submit-response.json"
-            local status
-            for attempt in 1 2 3 4 5 6 7 8 9 10; do
-              status=$(curl -sS -o "$response" -w "%{http_code}" \
-                -X PATCH \
-                -H "Authorization: Bearer $JWT" \
-                -H "Content-Type: application/json" \
-                -H "Accept: application/json" \
-                -d "$body" \
-                "$API/reviewSubmissions/$submission_id")
-              if [ "$status" -ge 200 ] && [ "$status" -le 299 ]; then
-                cat "$response"
-                return 0
-              fi
-              if [ "$status" -eq 409 ] && grep -q "try again later" "$response"; then
-                echo "App Store Connect says the version is not ready yet; retry $attempt/10 after 60 seconds."
-                sleep 60
-                continue
-              fi
-              echo "ASC request failed: PATCH /reviewSubmissions/$submission_id ($status)" >&2
-              cat "$response" >&2
-              exit 1
-            done
-            echo "ASC submission did not become ready after retrying." >&2
-            cat "$response" >&2
-            exit 1
-          }
-
-          submit_version_with_readiness_retry() {
-            local version_id="$1"
-            local body="{\"data\":{\"type\":\"appStoreVersionSubmissions\",\"relationships\":{\"appStoreVersion\":{\"data\":{\"type\":\"appStoreVersions\",\"id\":\"$version_id\"}}}}}"
-            local response="$RUNNER_TEMP/asc-version-submit-response.json"
-            local status
-            for attempt in 1 2 3 4 5 6 7 8 9 10; do
-              status=$(curl -sS -o "$response" -w "%{http_code}" \
-                -X POST \
-                -H "Authorization: Bearer $JWT" \
-                -H "Content-Type: application/json" \
-                -H "Accept: application/json" \
-                -d "$body" \
-                "$API/appStoreVersionSubmissions")
-              if [ "$status" -ge 200 ] && [ "$status" -le 299 ]; then
-                cat "$response"
-                return 0
-              fi
-              if [ "$status" -eq 409 ] && grep -q "try again later" "$response"; then
-                echo "App Store Connect says the version is not ready yet; retry $attempt/10 after 60 seconds."
-                sleep 60
-                continue
-              fi
-              echo "ASC request failed: POST /appStoreVersionSubmissions ($status)" >&2
-              cat "$response" >&2
-              exit 1
-            done
-            echo "ASC version submission did not become ready after retrying." >&2
-            cat "$response" >&2
-            exit 1
-          }
-
-          json_get() {
-            /usr/bin/python3 -c "import functools,json,operator,sys; data=json.load(sys.stdin); print(functools.reduce(operator.getitem, '$1'.split('.'), data))"
-          }
-
-          VERSION_RESPONSE=$(request GET "/apps/$APP_ID/appStoreVersions?filter%5Bplatform%5D=IOS&filter%5BversionString%5D=$TARGET_VERSION&limit=10")
-          VERSION_ID=$(printf "%s" "$VERSION_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); print(data['data'][0]['id'] if data.get('data') else '')")
-          if [ -z "$VERSION_ID" ]; then
-            echo "Could not find iOS app version $TARGET_VERSION for app $APP_ID." >&2
-            exit 1
-          fi
-          echo "Version ID: $VERSION_ID"
-
-          BUILD_RESPONSE=$(request GET "/builds?filter%5Bapp%5D=$APP_ID&filter%5Bversion%5D=$TARGET_BUILD_NUMBER&filter%5BprocessingState%5D=VALID&sort=-uploadedDate&limit=10")
-          BUILD_ID=$(printf "%s" "$BUILD_RESPONSE" | /usr/bin/python3 -c "import json,sys; data=json.load(sys.stdin); print(data['data'][0]['id'] if data.get('data') else '')")
-          if [ -z "$BUILD_ID" ]; then
-            echo "Could not find processed build $TARGET_BUILD_NUMBER. It may still be processing in App Store Connect." >&2
-            exit 1
-          fi
-          echo "Build ID: $BUILD_ID"
-
-          request_allow_already_set PATCH "/builds/$BUILD_ID" \
-            "{\"data\":{\"type\":\"builds\",\"id\":\"$BUILD_ID\",\"attributes\":{\"usesNonExemptEncryption\":false}}}" > /dev/null
-
-          request PATCH "/appStoreVersions/$VERSION_ID/relationships/build" \
-            "{\"data\":{\"type\":\"builds\",\"id\":\"$BUILD_ID\"}}" > /dev/null
-
-          REVIEW_DETAIL_RESPONSE=$(request GET "/appStoreVersions/$VERSION_ID/appStoreReviewDetail")
-          REVIEW_DETAIL_ID=$(printf "%s" "$REVIEW_DETAIL_RESPONSE" | json_get "data.id")
-          export REVIEW_NOTES="Build 1.0 (5) fixes the Guideline 2.1(a) issue from the previous review. The Choose Plan button now starts the StoreKit purchase flow and shows loading, success, pending, and unavailable/error feedback. StoreKit products are reloaded before purchase if needed. Please retest on iPad Air 11-inch (M3) / iPadOS 26.5."
-          ESCAPED_NOTES=$(/usr/bin/python3 -c "import json,os; print(json.dumps(os.environ['REVIEW_NOTES']))")
-          request PATCH "/appStoreReviewDetails/$REVIEW_DETAIL_ID" \
-            "{\"data\":{\"type\":\"appStoreReviewDetails\",\"id\":\"$REVIEW_DETAIL_ID\",\"attributes\":{\"notes\":$ESCAPED_NOTES}}}" > /dev/null
-
-          submit_version_with_readiness_retry "$VERSION_ID" > /dev/null
-
-          echo "Submitted ProfilePilot AI $TARGET_VERSION build $TARGET_BUILD_NUMBER for App Review."
+        run: python3 .github/scripts/asc_resubmit_assets.py
