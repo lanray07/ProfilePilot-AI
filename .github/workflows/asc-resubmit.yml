@@ -33,7 +33,7 @@ jobs:
           APPSTORE_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APPSTORE_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APPSTORE_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
-          SKIP_ASSET_REFRESH: "true"
+          SUBSCRIPTION_ASSETS_ONLY: "true"
         run: |
           . .venv/bin/activate
           python .github/scripts/asc_resubmit_assets.py

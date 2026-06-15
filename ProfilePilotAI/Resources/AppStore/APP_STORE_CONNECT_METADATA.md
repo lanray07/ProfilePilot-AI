@@ -182,11 +182,13 @@ Display Name: Professional Monthly
 
 Description: Unlimited AI coaching, STAR builder, voice coaching, mock interviews and application generation.
 
-Price: GBP 12.99 per month
+Pricing: configured in App Store Connect. Do not include price text in promoted In-App Purchase images, display names or descriptions.
 
 Review screenshot: `ProfilePilotAI/Resources/Subscriptions/professional-monthly-1600x1200.png`
 
 Promotional image: `ProfilePilotAI/Resources/Subscriptions/OptionalImages/professional-monthly-1024x1024.jpg`
+Promoted display name: Professional Coaching
+Promoted description: AI coaching and STAR examples
 
 ### Professional Yearly
 
@@ -198,11 +200,13 @@ Display Name: Professional Yearly
 
 Description: Best value annual access to unlimited coaching, interview practice and STAR example generation.
 
-Price: GBP 99.99 per year
+Pricing: configured in App Store Connect. Do not include price text in promoted In-App Purchase images, display names or descriptions.
 
 Review screenshot: `ProfilePilotAI/Resources/Subscriptions/professional-yearly-1600x1200.png`
 
 Promotional image: `ProfilePilotAI/Resources/Subscriptions/OptionalImages/professional-yearly-1024x1024.jpg`
+Promoted display name: Professional Toolkit
+Promoted description: Interview practice and career planning
 
 ### Career Accelerator Monthly
 
@@ -214,11 +218,13 @@ Display Name: Career Accelerator
 
 Description: Advanced analytics, executive coaching modes, premium templates, simulations and career roadmap tools.
 
-Price: GBP 24.99 per month
+Pricing: configured in App Store Connect. Do not include price text in promoted In-App Purchase images, display names or descriptions.
 
 Review screenshot: `ProfilePilotAI/Resources/Subscriptions/career-accelerator-1600x1200.png`
 
 Promotional image: `ProfilePilotAI/Resources/Subscriptions/OptionalImages/career-accelerator-1024x1024.jpg`
+Promoted display name: Career Accelerator
+Promoted description: Executive prep and advanced coaching
 
 ## Subscription Group
 

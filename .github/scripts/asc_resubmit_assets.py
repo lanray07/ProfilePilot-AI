@@ -57,7 +57,9 @@ The paywall now uses Apple's native SubscriptionStoreView for Professional Month
 Privacy Policy: {PRIVACY_URL}
 Terms of Use: {TERMS_URL}
 
-The App Store screenshots have been replaced with actual in-app UI screenshots for iPhone and iPad. Subscription promotional images were replaced with larger, readable subscription-specific artwork. No sign-in is required; mock AI is enabled by default for review."""
+The App Store screenshots have been replaced with actual in-app UI screenshots for iPhone and iPad. Subscription promotional images were replaced with larger, readable subscription-specific artwork. No sign-in is required; mock AI is enabled by default for review.
+
+June 15 metadata update: promoted In-App Purchase images and subscription localization descriptions no longer include price or currency references. The promotional images use large, readable text only."""
 
 SCREENSHOT_SETS = {
     "APP_IPHONE_65": [
@@ -80,16 +82,22 @@ SUBSCRIPTION_ASSETS = {
     "profilepilot.professional.monthly": {
         "review": "ProfilePilotAI/Resources/Subscriptions/ReviewScreenshots/professional-monthly-review-1242x2688.jpg",
         "image": "ProfilePilotAI/Resources/Subscriptions/OptionalImages/professional-monthly-1024x1024.jpg",
+        "name": "Professional Coaching",
+        "description": "AI coaching and STAR examples",
         "note": "Professional Monthly uses SubscriptionStoreView and unlocks AI coaching, STAR examples and mock interviews. Mock AI is enabled by default for review.",
     },
     "profilepilot.professional.yearly": {
         "review": "ProfilePilotAI/Resources/Subscriptions/ReviewScreenshots/professional-yearly-review-1242x2688.jpg",
         "image": "ProfilePilotAI/Resources/Subscriptions/OptionalImages/professional-yearly-1024x1024.jpg",
+        "name": "Professional Toolkit",
+        "description": "Interview practice and career planning",
         "note": "Professional Yearly uses SubscriptionStoreView and unlocks AI coaching, STAR examples and mock interviews for one year. Mock AI is enabled by default for review.",
     },
     "profilepilot.accelerator.monthly": {
         "review": "ProfilePilotAI/Resources/Subscriptions/ReviewScreenshots/career-accelerator-review-1242x2688.jpg",
         "image": "ProfilePilotAI/Resources/Subscriptions/OptionalImages/career-accelerator-1024x1024.jpg",
+        "name": "Career Accelerator",
+        "description": "Executive prep and advanced coaching",
         "note": "Career Accelerator uses SubscriptionStoreView and unlocks advanced coaching, interview preparation and premium career planning. Mock AI is enabled by default for review.",
     },
 }
@@ -326,6 +334,7 @@ def delete_included(payload, resource_type, endpoint):
 def replace_subscription_assets():
     for product_id, subscription_id in subscription_ids_by_product_id().items():
         config = SUBSCRIPTION_ASSETS[product_id]
+        update_subscription_localizations(subscription_id, config["name"], config["description"])
         asc.request(
             "PATCH",
             f"/subscriptions/{subscription_id}",
@@ -361,6 +370,47 @@ def replace_subscription_assets():
             subscription_id,
             config["image"],
         )
+
+
+def update_subscription_localizations(subscription_id, name, description):
+    payload = asc.request("GET", f"/subscriptions/{subscription_id}/subscriptionLocalizations?limit=200")
+    localizations = payload.get("data", [])
+    if not localizations:
+        body = {
+            "data": {
+                "type": "subscriptionLocalizations",
+                "attributes": {
+                    "locale": "en-GB",
+                    "name": name,
+                    "description": description,
+                },
+                "relationships": {
+                    "subscription": {"data": {"type": "subscriptions", "id": subscription_id}}
+                },
+            }
+        }
+        created = asc.request("POST", "/subscriptionLocalizations", body)
+        print(f"Created subscription localization {created['data']['id']} for subscription {subscription_id}.")
+        return
+
+    for localization in localizations:
+        localization_id = localization["id"]
+        locale = localization.get("attributes", {}).get("locale", "")
+        asc.request(
+            "PATCH",
+            f"/subscriptionLocalizations/{localization_id}",
+            {
+                "data": {
+                    "type": "subscriptionLocalizations",
+                    "id": localization_id,
+                    "attributes": {
+                        "name": name,
+                        "description": description,
+                    },
+                }
+            },
+        )
+        print(f"Updated subscription localization {localization_id} ({locale}).")
 
 
 def attach_build_and_review_notes(version_id, build_id):
@@ -507,6 +557,9 @@ def main():
     version_id, localization_id = version_and_localization()
     if os.environ.get("SKIP_ASSET_REFRESH", "").lower() == "true":
         print("Skipping asset refresh; using existing App Store Connect metadata and media.")
+    elif os.environ.get("SUBSCRIPTION_ASSETS_ONLY", "").lower() == "true":
+        print("Refreshing subscription metadata and promotional images only.")
+        replace_subscription_assets()
     else:
         update_version_metadata(localization_id)
         replace_screenshots(localization_id)
