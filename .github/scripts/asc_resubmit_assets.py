@@ -372,6 +372,29 @@ def replace_subscription_assets():
         )
 
 
+def delete_subscription_promotional_images():
+    for product_id, subscription_id in subscription_ids_by_product_id().items():
+        config = SUBSCRIPTION_ASSETS[product_id]
+        update_subscription_localizations(subscription_id, config["name"], config["description"])
+        asc.request(
+            "PATCH",
+            f"/subscriptions/{subscription_id}",
+            {
+                "data": {
+                    "type": "subscriptions",
+                    "id": subscription_id,
+                    "attributes": {"reviewNote": config["note"]},
+                }
+            },
+        )
+        current = asc.request(
+            "GET",
+            f"/subscriptions/{subscription_id}?include=images&limit%5Bimages%5D=10",
+        )
+        delete_included(current, "subscriptionImages", "/subscriptionImages")
+        print(f"Removed promoted In-App Purchase image for {product_id}.")
+
+
 def update_subscription_localizations(subscription_id, name, description):
     payload = asc.request("GET", f"/subscriptions/{subscription_id}/subscriptionLocalizations?limit=200")
     localizations = payload.get("data", [])
@@ -557,6 +580,9 @@ def main():
     version_id, localization_id = version_and_localization()
     if os.environ.get("SKIP_ASSET_REFRESH", "").lower() == "true":
         print("Skipping asset refresh; using existing App Store Connect metadata and media.")
+    elif os.environ.get("DELETE_SUBSCRIPTION_PROMO_IMAGES", "").lower() == "true":
+        print("Deleting promoted In-App Purchase images and keeping price-free subscription metadata.")
+        delete_subscription_promotional_images()
     elif os.environ.get("SUBSCRIPTION_ASSETS_ONLY", "").lower() == "true":
         print("Refreshing subscription metadata and promotional images only.")
         replace_subscription_assets()
